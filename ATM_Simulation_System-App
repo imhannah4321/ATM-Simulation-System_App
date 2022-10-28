@@ -1,0 +1,408 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Text;
+
+namespace ATM_APP
+{
+    class Bank
+    {
+        protected string acc_typ;
+        protected double balance;
+        public static double AMOUNT_LIMIT = 500000;
+
+        public Bank(string acc_type, double balance) { this.acc_typ = acc_type; this.balance = balance; }
+    }
+    class usrDetails : Bank
+    {
+        private string name; private int pin; private double trail; private double _atm_num;
+
+        // pass parameter to base constructor  
+        public usrDetails(double atm_num, string acc_type, string name, double balance, int pin)
+          : base(acc_type, balance)
+        {
+            this.atm_num = atm_num; this.name = name; this.pin = pin;
+        }
+        public string usrName { get { return name; } set { name = value; } }
+        public string acc_type { get { return acc_typ; } set { acc_typ = value; } }
+        public double usrMaxTrail { get { return trail; } set { trail = value; } }
+        public int usrPin { get { return pin; } set { pin = value; } }
+        public double atm_num { get { return _atm_num; } set { _atm_num = value; } }
+        public double bal { get { return balance; } set { balance = value; } }
+    }
+    class ATM
+    {
+        static public DateTime dt = DateTime.Now; //date and time
+        public usrDetails[] usr = new usrDetails[10];
+        public ATM()  // user details
+        {
+                                        //CARD NO.     ACC TYPE        USER NAME               BALANCE  PIN CODE
+            usr[0] = new usrDetails(0123456789101112, "Savings", "Hannah Soaib Angni",          35000, 122333);
+            usr[1] = new usrDetails(0219200087210212, "Savings", "Key Mhare Diaz Adeva",        30000, 102102);
+
+            usr[2] = new usrDetails(0968654146612345, "Savings", "Jay Anne Gua-an Lalanan",     45000, 091502);
+            usr[3] = new usrDetails(1122334455667788, "Savings", "Mira Mea Salagan Aguilar ",   40000, 732513);
+
+            usr[4] = new usrDetails(2021202220132198, "Savings", "Anadyl Pagute",               50000, 679002);
+            usr[5] = new usrDetails(2110300156661192, "Savings", "Mary Jane Veradio Sulilawan", 65000, 136901);
+
+            usr[6] = new usrDetails(1212100303664561, "Savings", "May Joy Timbal Solis",        85000, 200510);
+            usr[7] = new usrDetails(8210648229910133, "Savings", "Karel Palasan Naguita",       80000, 980723);
+
+            usr[8] = new usrDetails(1150280001213090, "Savings", "Kert Ice Griffing Roque",     75000, 210812);
+            usr[9] = new usrDetails(3728372127361273, "Savings", "Angelo Carro Serafino",       70000, 201230);
+        }
+        //The ATM Specific UI  
+        public static void UI_atm_prompt(String msg)
+        {
+            Start.main_header(); Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(Start.tab2 + msg + "\n\n"); Start.footer(); Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(Start.tab2 + "Press <any> key to return:"); Console.ReadKey(); Console.ForegroundColor = ConsoleColor.White;
+        }
+        public static void UI_loading() //Methods: For loading animation
+        {
+            Start.main_header(); Console.ForegroundColor = ConsoleColor.DarkYellow; 
+            Console.WriteLine("\n\n\t\t  Transaction is being processed\n\n");
+            Console.Write("\t\t\t "); Console.ForegroundColor = ConsoleColor.White;
+
+            int timer = 13;         //timer animation
+            for (int i = 0; i < timer; i++) { Console.Write(". "); Thread.Sleep(200); }
+        }
+        public void deposit(double atm_numb) //Methods: Deposit
+        {
+            int i = 0;
+            bool check = false;
+            for (int j = 0; j < usr.Length; j++)
+            {
+                if (usr[j].atm_num == atm_numb) // valid acc_no  
+                {
+                    check = true;
+                    i = j;
+                }
+            }
+            if (check)
+            {
+                Start.main_header(); Console.WriteLine("\t\t  ACCOUNT TYPE: " + usr[i].acc_type + " \n\n");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("\t\t\tPLEASE ENTER DESIRED AMOUNT \n\n"); 
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write("\t\t\t\t");
+                try
+                {
+                    double depositAmount = Convert.ToDouble(Console.ReadLine());
+
+                    if (depositAmount >= 100)
+                    {
+                        if (depositAmount <= Bank.AMOUNT_LIMIT)
+                        {
+                            usr[i].bal += depositAmount; UI_loading();
+                            UI_atm_prompt("\n\n\n\t\t\tSUCCESSFULLY DEPOSIT  " + depositAmount + ".00\n\n\n");
+                            Console.Clear(); Console.WriteLine("\n\n"); Start.footer(); Console.ForegroundColor = ConsoleColor.Cyan; 
+                            Console.WriteLine("\t\t\t    SECURE MONEY BANK"); Start.footer(); Console.ForegroundColor = ConsoleColor.Yellow;
+                            //Receipt
+                            Console.WriteLine("\n\t\t   DATE\t\t\t\t   TIME \n\t\t   " + dt.ToString("d") + "\t\t\t   " + dt.ToString("H:mmtt\t"));
+                            Console.WriteLine("\n\t\t   TRANSACTION\t\t\t   AMOUNT");
+                            Console.WriteLine("\t\t   CASH DEPOSIT\t\t\t   " + depositAmount + ".00\n");
+                            Console.WriteLine("\n\t\t   AVAIL BALANCE\t\t   " + usr[i].bal + ".00\n");
+
+                            Start.footer(); Console.ForegroundColor = ConsoleColor.Green;
+                            Console.WriteLine("\t\t Press <any> key to return: ");
+                            Console.ReadKey(); Console.ForegroundColor = ConsoleColor.White;
+                            return;
+                        }
+                        else
+                        {
+                            Start.UI_error("WARNING: FUNDS CAN'T EXCEED 500000\n\t\t\t   IN SINGLE TRANSACTION!"
+                                 + "\n\n\t\t  NOTE: A LARGE DEPOSIT IS SIMPLY REPORTED \n" + "\t\t\t BY A BANK TO REGULATORS TO TRACK \n" 
+                                 + "\t\t\t POSSIBLE SUSPICIOUS ACTIVITY. ");
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        Start.UI_error("Invalid Fund!");
+                        return;
+                    }
+                }
+                catch (Exception)
+                {
+                    Start.UI_error("Only numbers are allowed");
+                    return;
+                }
+            }
+        }
+        public void withdraw(double atm_numb) //Methods: For withdrawal
+        {
+            int i = 0;
+            bool check = false;
+            for (int j = 0; j < usr.Length; j++)
+            {
+                if (usr[j].atm_num == atm_numb) // valid acc_no  
+                {
+                    check = true;
+                    i = j;
+                }
+            }
+            if (check)
+            {
+                if (usr[i].bal <= 100)
+                {
+                    Start.UI_error("INSUFFICIENT FUND!");   // this will be display if the current balance is zero.
+                }
+                else
+                {
+                    Start.main_header();
+                    Console.WriteLine("\t\t  ACCOUNT TYPE: " + usr[i].acc_type + " \n\n"); Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("\t\t\tPLEASE ENTER DESIRED AMOUNT \n\n"); Console.ForegroundColor = ConsoleColor.White;
+                    Console.Write("\t\t\t\t");
+                    try
+                    {
+                        double withdrawAmount = Convert.ToDouble(Console.ReadLine());
+                        if (withdrawAmount <= usr[i].bal && withdrawAmount <= Bank.AMOUNT_LIMIT)
+                        {
+                            if (withdrawAmount <= Bank.AMOUNT_LIMIT)
+                            {
+                                usr[i].bal -= withdrawAmount; UI_loading();
+                                UI_atm_prompt("\n\n\t\t\tSUCCESSFULLY WITHDRAW  " + withdrawAmount + ".00" +
+                                    "\n\n\n\t\t  PLEASE COLLECT YOUR MONEY " + "\n\t\t  THANK YOU :)\n\n");
+                                Console.Clear(); Console.WriteLine("\n\n"); Start.footer(); Console.ForegroundColor = ConsoleColor.Cyan; 
+                                Console.WriteLine("\t\t\t    SECURE MONEY BANK"); Start.footer(); Console.ForegroundColor = ConsoleColor.Yellow;
+                                //Receipt
+                                Console.WriteLine("\n\t\t   DATE\t\t\t\t   TIME \n\t\t   " + dt.ToString("d") + "\t\t\t   " + dt.ToString("H:mmtt\t"));
+                                Console.WriteLine("\n\t\t   TRANSACTION\t\t\t   AMOUNT");
+                                Console.WriteLine("\t\t   CASH WITHDRAWAL\t\t   " + withdrawAmount + ".00");
+                                Console.WriteLine("\n\t\t   AVAIL BALANCE\t\t   " + usr[i].bal + ".00\n\n");
+
+                                Start.footer(); Console.ForegroundColor = ConsoleColor.Green;
+                                Console.WriteLine("\t\t Press <any> key to return");
+                                Console.ReadKey(); Console.ForegroundColor = ConsoleColor.White;
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            Start.UI_error("INSUFFICIENT FUND");
+                            return;
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        Start.UI_error("Only numbers are allowed");
+                        return;
+                    }
+                }
+            }
+        }
+        public void balance(double atm_numb) //Methods: for balance
+        {
+            int i = 0;
+            bool check = false;
+            for (int j = 0; j < usr.Length; j++)
+            {
+                if (usr[j].atm_num == atm_numb) // valid acc_no  
+                {
+                    check = true;
+                    i = j;
+                }
+            }
+            if (check)
+            {
+
+                UI_atm_prompt(Start.tab + "\n\t\tACCOUNT TYPE " + usr[i].acc_type + "\n\n\n\n" + Start.tab3 + " CURRENT BALANCE: " + usr[i].bal + ".00" + "\n\n");
+            }
+        }
+    }
+    class Start // Methods: Margins/space
+    {
+        public static string tab3 = "\t\t\t  "; public static string tab2 = "\t\t  "; public static string tab = "\t\t";
+        static int count, mnuChoice = 0;     // A count no. of trials for login if > 3 exit user!!  
+                                             //user-interface thread, or the UI thread.  
+        public static void header() //Methods: title header
+        {
+            Console.Clear(); Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("\n\n\n\n\t\t============================================="); Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine(tab3 + "    SECURE MONEY BANK              "); Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("\t\t=============================================");
+        }
+        public static void main_header() //Methods: header design w/date and time
+        {
+            Console.Clear(); Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("\n\n\t\t\t\t" + tab + ATM.dt.ToString("d")); footer(); Console.WriteLine(tab3 + "    SECURE MONEY BANK"); footer();
+        }
+        public static void footer() //Methods: footer design
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("\t\t=============================================");
+        }
+        public static void UI_home()
+        {
+            header();
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("\n\n\n\t\t    WELCOME TO SMB ATM ");
+            Console.WriteLine("\n\n\t\t    - MAKES YOUR MONEY");
+            Console.WriteLine("\t\t    - SECURE AND SAFE \n\n"); Console.Write(tab2); Console.ForegroundColor = ConsoleColor.White;
+            int timer = 20;
+            for (int i = 0; i < timer; i++) { Console.Write("+ "); Thread.Sleep(65); }//animation
+
+            Console.ForegroundColor = ConsoleColor.White; Console.Write("\n\n\n");
+            footer(); Console.ForegroundColor = ConsoleColor.DarkYellow; Console.Write(tab2 + "Press <any> key to continue");
+            Console.ReadKey(); Console.ForegroundColor = ConsoleColor.White;
+        }
+        public static int UI_login(ref ATM u, ref double atm_no) //Methods: UI Login
+        {
+            header(); Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("\n\n\n" + tab2 + "  PLEASE ENTER YOUR 16-DIGIT CARD NUMBER"); Console.ForegroundColor = ConsoleColor.White;
+            Console.Write("\n" + tab + "\t     "); //the user will input/enter Card No.
+            try
+            {
+                bool check = false;
+                int i = 0;
+                double atm_numb = Convert.ToDouble(Console.ReadLine());
+                atm_no = atm_numb;
+                for (int j = 0; j < u.usr.Length; j++)
+                {
+                    if (u.usr[j].atm_num == atm_numb) // valid acc_no  
+                    {
+                        check = true;
+                        i = j;
+                    }
+                }
+                if (check) // valid acc_no  
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("\n\n" + tab2 + "\t  PLEASE ENTER YOUR 6-DIGIT \n \t\t    PERSONAL IDENTIFICATION NUMBER (PIN)");
+                    Console.ForegroundColor = ConsoleColor.White; Console.Write("\n" + tab + "\t\t "); //the user will input/enter pin code
+                    string acc_pin = ""; ConsoleKeyInfo key;
+                    do
+                    {
+                        key = Console.ReadKey(true);
+                        if (key.Key != ConsoleKey.Backspace) // Backspace cant use 
+                        {
+                            acc_pin += key.KeyChar; Console.Write("*");
+                        }
+                        else
+                        {
+                            if ((acc_pin.Length - 1) != -1)
+                            {
+                                acc_pin = acc_pin.Remove(acc_pin.Length - 1); Console.Write("\b \b");
+                            }
+                        }
+                    }        // Stops Receving Keys Once Enter is Pressed  
+                    while (key.Key != ConsoleKey.Enter);
+                    if ((u.usr[i].usrPin == int.Parse(acc_pin)) && (u.usr[i].atm_num == atm_numb)) // valid acc_no && pass  
+                    {
+                        return 1; // 1: means successfull  
+                    }
+                    else
+                    {
+                        u.usr[i].usrMaxTrail = count++;    //  usr if exceeded Trails == 3  
+
+                        if (u.usr[i].usrMaxTrail >= 2)
+                        {
+                            count = 0;
+                            UI_error("WARNING: You have reached the maxed limit " + "\n" + tab3 + "of trying " + "\n\n" + tab2 +
+                                     "    Do you need help?" + "\n" + tab2 + "    Did you forget your PIN code? " + "\n\n" + tab2
+                                    + "    Please take your time and try again \n" + tab2 +
+                                    "    Or go to the nearest branch of our\n" + tab2 +
+                                    "    ATM Bank. \n\n" + tab3 +
+                                    "    THANK YOU :)");
+                            Main();
+                        }
+                        else { return 2; }         //< 3 trials but invalid password  
+                    }
+                }
+                else { return 3; }                   // Invalid account number  
+            }
+            catch (Exception) { return -1; }
+            return 0;                             // defualt : false  
+
+        }
+        public static void UI_error(String error) //Methods: For Errors
+        {
+            header(); Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("\n\n\n" + tab2 + error + "\n\n"); Console.ForegroundColor = ConsoleColor.White;
+            footer(); Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.Write(tab2 + "Press <any> key to continue"); Console.ReadKey(); Console.ForegroundColor = ConsoleColor.White;
+        }
+        public static void UI_msgbox(String msg) //Methods: For the messanges
+        {
+            header(); Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("\n\n" + tab2 + msg + "\n\n"); Console.ForegroundColor = ConsoleColor.White;
+            footer(); Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.Write(tab2 + "Press <any> key to continue"); Console.ReadKey(); Console.ForegroundColor = ConsoleColor.White;
+        }
+        public static double UI_main(ref double atm_n) //Methods: For UI main function
+        {
+            ATM validUsr = new ATM(); string name = "";
+            main_header();
+            for (int i = 0; i < validUsr.usr.Length; i++)  //for loop
+            {
+                if (validUsr.usr[i].atm_num == atm_n) { name = validUsr.usr[i].usrName; }
+            }
+            //Menus that use for switch statements
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("\n\n" + tab + "  PLEASE CHOOSE YOUR DESIRED TRANSACTION\n\n");
+            Console.WriteLine(tab + "  [1] DEPOSIT              [2] WITHDRAW\n");
+            Console.WriteLine(tab + "  [3] BALANCE INQ          [4] LOGOUT\n\n\n");
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            footer(); Console.ForegroundColor = ConsoleColor.Green; Console.Write(tab2 + "TYPE HERE \n \t\t  >>>  "); Console.ForegroundColor = ConsoleColor.White;
+
+            try { int ch = int.Parse(Console.ReadLine()); return ch; }
+
+            catch (Exception) { return -1; }
+        }
+        public static void Main()//Methods: Main function
+        {
+            ATM a = new ATM(); FUNCT_MAIN:          // from MAIN MENUS logic to avoid re-initilialize ATM class!!  
+            double getAtm_no = 0;
+            UI_home();           // Homepage   // Login Page logic 
+        LOGIN:
+            double isValidLogin = UI_login(ref a, ref getAtm_no); // calls login UI which return integers   
+            Console.ForegroundColor = ConsoleColor.Red;
+            switch (isValidLogin)
+            {
+                case -1:
+                    UI_error("Alphabets Not Allowed");
+                    goto LOGIN;
+                case 1:
+                    goto MAIN_MENU; // Go to Main Menus if valid user  
+                case 2:
+                    UI_error("\t INVALID PIN NO.\n\n\n");
+                    goto LOGIN;
+                case 3:
+                    UI_error("\t CARD NUMBER NOT RECOGNIZED\n\n\n");
+                    goto LOGIN;
+            }
+            Console.ForegroundColor = ConsoleColor.White;
+        MAIN: //label
+        MAIN_MENU: // a Label from Login Page  
+            while (true) //While Loop
+            {
+                mnuChoice = (int)UI_main(ref getAtm_no); // call MAIN_UI  
+                switch (mnuChoice) //Switch statement
+                {
+                    case -1:
+                        UI_error("Alphabets Not Allowed");
+                        goto MAIN;
+                    case 1:
+                        a.deposit(getAtm_no);
+                        break;
+                    case 2:
+                        a.withdraw(getAtm_no);
+                        break;
+                    case 3:
+                        a.balance(getAtm_no);
+                        break;
+
+                    case 4:
+                        UI_msgbox("\n\t\t\tTHANK YOU FOR USING SMB ATM  \n\n\n");
+                        GC.SuppressFinalize(a);//Garbage Collection  
+                        goto FUNCT_MAIN;
+                    default:
+                        UI_error("INVALID CHOICE! [1-4].");
+                        break;
+                }
+            }
+        }
+    }
+}
